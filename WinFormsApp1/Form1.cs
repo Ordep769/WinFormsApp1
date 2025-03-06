@@ -4,18 +4,13 @@ namespace WinFormsApp1
 {
     public partial class Form1 : Form
     {
-        //random
-
-
-
         List<Color> colorList = new List<Color>() { Color.Blue, Color.Red, Color.Green, Color.Yellow, Color.Gray };
         Random rand = new Random();
 
         //variáveis
-        //propriedades
-        //2 botões
         private Button btnIniciar;
         private Button btnAlvo;
+        private Label label1;
 
         private System.Windows.Forms.Timer timer;
         private System.Windows.Forms.Timer timerTrocaCor;
@@ -23,10 +18,14 @@ namespace WinFormsApp1
         //timer
         private Random random;
 
-
         //stopWatch
         private Stopwatch stopwatch;
 
+        List<double> ultimasPontuacoes = new List<double>();
+
+        // Variável para controlar o tamanho do botão
+        private int tamanhoInicialBotao = 50;
+        private int tamanhoMinimoBotao = 20;
 
         public Form1()
         {
@@ -34,32 +33,34 @@ namespace WinFormsApp1
 
             //determina o titulo da tela 
             this.Text = "Reflexo";
-            //altura da tela
             this.Size = new Size(400, 400);
-            //determina os botões da tela
             this.StartPosition = FormStartPosition.CenterParent;
             btnIniciar = new Button()
             {
-                Text = "iniciar",
+                Text = "Iniciar",
                 Size = new Size(100, 50)
             };
             btnIniciar.Click += IniciarJogo;
-            //adiciona o botão na tela
             this.Controls.Add(btnIniciar);
-
 
             //btnalvo
             btnAlvo = new Button()
             {
-                Size = new Size(50, 50),
+                Size = new Size(tamanhoInicialBotao, tamanhoInicialBotao),
                 BackColor = colorList[rand.Next(0, colorList.Count - 1)],
                 Visible = false,
             };
             btnAlvo.Click += btnAlvoClick;
-            //adiciona o botão na tela, mas culto
             this.Controls.Add(btnAlvo);
 
+            //label1
+            label1 = new Label();
+            label1.Location = new Point(50, 50);
+            label1.Size = new Size(100, 100);
+            label1.Text = "";
+            label1.Visible = true;
 
+            this.Controls.Add(label1);
 
             //timer
             timer = new System.Windows.Forms.Timer();
@@ -69,7 +70,6 @@ namespace WinFormsApp1
             timerTrocaCor.Interval = 5000;
             timerTrocaCor.Tick += MostrarBotaoAlvo;
 
-            // random
             random = new Random();
             stopwatch = new Stopwatch();
         }
@@ -80,9 +80,7 @@ namespace WinFormsApp1
             //desabilita o botão
             btnIniciar.Enabled = false;
             IniciarNovaRodada();
-
         }
-
 
         private void IniciarNovaRodada()
         {
@@ -92,24 +90,17 @@ namespace WinFormsApp1
             timer.Start();
             stopwatch.Restart();
         }
+
         private void MostrarBotaoAlvo(object sender, EventArgs e)
         {
-
-            // parar o tempo no clicar o botao
             timer.Stop();
-            //gera os valores aleatorios para a posicao btn alvo
             int x = random.Next(50, this.ClientSize.Width - 70);
             int y = random.Next(50, this.ClientSize.Height - 70);
             btnAlvo.BackColor = colorList[rand.Next(0, colorList.Count - 1)];
-            btnAlvo.Location = new Point(x, y); // define a posiçao do btn alvo
-            btnAlvo.Visible = true; // exibe o botao alvo na tela
-            stopwatch.Restart(); // reiniciar o cronometro
-
-
-
+            btnAlvo.Location = new Point(x, y);
+            btnAlvo.Visible = true;
+            stopwatch.Restart();
         }
-
-
 
         // Ao clicar no botão alvo
         private void btnAlvoClick(object sender, EventArgs e)
@@ -117,24 +108,54 @@ namespace WinFormsApp1
             stopwatch.Stop();
             btnAlvo.Visible = false;
             timerTrocaCor.Stop();
+
+            // Verifica se a cor do botão é azul
             if (btnAlvo.BackColor == Color.Blue)
             {
+                // Adiciona o tempo de reação nas últimas pontuações
+                ultimasPontuacoes.Add(stopwatch.ElapsedMilliseconds);
+
+                // Se já tem mais de 5 pontuações armazenadas
+                if (ultimasPontuacoes.Count() > 5)
+                {
+                    // Remove a pontuação mais antiga
+                    ultimasPontuacoes.RemoveAt(0);
+                }
+
+                string pontuacoes = "";
+
+                foreach (double pontuacao in ultimasPontuacoes)
+                {
+                    pontuacoes += $"{pontuacao} ms \n";
+                }
+
+                label1.Text = pontuacoes;
+
                 MessageBox.Show($"Tempo de reação: {stopwatch.ElapsedMilliseconds}ms", "Você acertouuuu!");
 
-                Task.Delay(500)
-                    .ContinueWith(t => IniciarNovaRodada(),
-                    TaskScheduler.FromCurrentSynchronizationContext());
+                // Diminui o tamanho do botão após o acerto
+                DiminuirTamanhoBotao();
+
+                // Inicia uma nova rodada após um pequeno delay
+                Task.Delay(500).ContinueWith(t => IniciarNovaRodada(), TaskScheduler.FromCurrentSynchronizationContext());
             }
             else
             {
                 MessageBox.Show("Botão cor errada, seu burro");
 
-                Task.Delay(500)
-                    .ContinueWith(t => IniciarNovaRodada(),
-                    TaskScheduler.FromCurrentSynchronizationContext());
+                // Inicia uma nova rodada após um pequeno delay
+                Task.Delay(500).ContinueWith(t => IniciarNovaRodada(), TaskScheduler.FromCurrentSynchronizationContext());
             }
+        }
 
-
+        private void DiminuirTamanhoBotao()
+        {
+            // Verifica se o tamanho do botão não atingiu o limite mínimo
+            if (btnAlvo.Width > tamanhoMinimoBotao && btnAlvo.Height > tamanhoMinimoBotao)
+            {
+                int novoTamanho = btnAlvo.Width - 5;  // Diminuir 5 unidades a cada acerto
+                btnAlvo.Size = new Size(novoTamanho, novoTamanho);
+            }
         }
     }
 }
