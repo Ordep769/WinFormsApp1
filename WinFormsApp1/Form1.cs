@@ -24,8 +24,8 @@ namespace WinFormsApp1
         List<double> ultimasPontuacoes = new List<double>();
 
         // Variável para controlar o tamanho do botão
-        private int tamanhoInicialBotao = 50;
-        private int tamanhoMinimoBotao = 20;
+        private int tamanhoInicialBotao = 100;
+        private int tamanhoMinimoBotao = 100;
 
         public Form1()
         {
@@ -56,7 +56,7 @@ namespace WinFormsApp1
             //label1
             label1 = new Label();
             label1.Location = new Point(50, 50);
-            label1.Size = new Size(100, 100);
+            label1.Size = new Size(60, 120);
             label1.Text = "";
             label1.Visible = true;
 
@@ -105,6 +105,11 @@ namespace WinFormsApp1
         // Ao clicar no botão alvo
         private void btnAlvoClick(object sender, EventArgs e)
         {
+            int novaLarguraBotao = btnAlvo.Size.Width -10;
+            int novaAlturaBotao = btnAlvo.Size.Width -10;
+
+            btnAlvo.Size = new Size(novaLarguraBotao, novaAlturaBotao);
+
             stopwatch.Stop();
             btnAlvo.Visible = false;
             timerTrocaCor.Stop();
@@ -131,7 +136,7 @@ namespace WinFormsApp1
 
                 label1.Text = pontuacoes;
 
-                MessageBox.Show($"Tempo de reação: {stopwatch.ElapsedMilliseconds}ms", "Você acertouuuu!");
+                MessageBox.Show($"Tempo de reação: {stopwatch.ElapsedMilliseconds}ms", "Boa guri!");
 
                 // Diminui o tamanho do botão após o acerto
                 DiminuirTamanhoBotao();
@@ -141,7 +146,7 @@ namespace WinFormsApp1
             }
             else
             {
-                MessageBox.Show("Botão cor errada, seu burro");
+                MessageBox.Show("Botão cor errada, Burrao");
 
                 // Inicia uma nova rodada após um pequeno delay
                 Task.Delay(500).ContinueWith(t => IniciarNovaRodada(), TaskScheduler.FromCurrentSynchronizationContext());
